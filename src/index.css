@@ -2,41 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Groot Magazine Design System - Modern Science & Tech Publication */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Brand Colors */
+    --background: 220 27% 8%;
+    --foreground: 213 31% 91%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 23% 11%;
+    --card-foreground: 213 31% 91%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 23% 11%;
+    --popover-foreground: 213 31% 91%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Electric Cyan */
+    --primary: 189 97% 55%;
+    --primary-foreground: 220 27% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Deep Slate */
+    --secondary: 220 17% 17%;
+    --secondary-foreground: 213 31% 91%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted tones */
+    --muted: 220 17% 17%;
+    --muted-foreground: 215 16% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Bright cyan */
+    --accent: 189 97% 55%;
+    --accent-foreground: 220 27% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 213 31% 91%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 17% 17%;
+    --input: 220 17% 17%;
+    --ring: 189 97% 55%;
 
-    --radius: 0.5rem;
+    /* Design tokens */
+    --radius: 0.75rem;
+    
+    /* Custom brand gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(189 97% 55%), hsl(212 97% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 17% 17%), hsl(220 23% 11%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 27% 8%) 0%, hsl(220 23% 11%) 50%, hsl(220 17% 17%) 100%);
+    
+    /* Typography scale */
+    --font-heading: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 27% 8% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 27% 8% / 0.1), 0 2px 4px -1px hsl(220 27% 8% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(220 27% 8% / 0.1), 0 4px 6px -2px hsl(220 27% 8% / 0.05);
+    --shadow-glow: 0 0 20px hsl(189 97% 55% / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
