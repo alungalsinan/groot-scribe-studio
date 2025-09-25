@@ -1,73 +1,189 @@
-# Welcome to your Lovable project
+# Groot Magazine
 
-## Project info
+A modern, feature-rich magazine website with role-based admin panels and Firebase integration.
 
-**URL**: https://lovable.dev/projects/bb790849-3d13-40b7-a708-ce66c55e85f0
+## Features
 
-## How can I edit this code?
+### Public Site
+- Responsive magazine layout with modern design
+- Article browsing and detailed views
+- Category-based content organization
+- Search functionality
+- SEO optimized pages
 
-There are several ways of editing your application.
+### Admin Panels
 
-**Use Lovable**
+#### Author Admin
+- Create and manage articles
+- Upload media files
+- Track upload history with detailed metadata
+- View personal analytics
+- Draft and publish workflow
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/bb790849-3d13-40b7-a708-ce66c55e85f0) and start prompting.
+#### Super Admin
+- Complete user management
+- Content moderation and visibility control
+- Site-wide settings and maintenance mode
+- Security and audit logs
+- System analytics and monitoring
 
-Changes made via Lovable will be committed automatically to this repo.
+## Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth
+- **Storage**: Firebase Storage
+- **Routing**: React Router v6
+- **State Management**: React Query + Context API
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Firebase Setup Instructions
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 1. Create Firebase Project
 
-Follow these steps:
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Click "Add project" and follow the setup wizard
+3. Choose a project name (e.g., "groot-magazine")
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 2. Enable Required Services
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+**Authentication:**
+1. Go to Authentication > Sign-in method
+2. Enable "Email/Password" provider
+3. Optionally enable "Google" for easier sign-ins
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Firestore Database:**
+1. Go to Firestore Database
+2. Click "Create database"
+3. Start in "test mode" (we'll configure rules later)
+4. Choose a location close to your users
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+**Storage:**
+1. Go to Storage
+2. Click "Get started"
+3. Start in test mode
+
+### 3. Get Firebase Configuration
+
+1. Go to Project Settings (gear icon)
+2. Scroll down to "Your apps"
+3. Click "Add app" > Web app
+4. Register your app with a name
+5. Copy the configuration object
+
+### 4. Update Firebase Config
+
+Replace the config in `src/lib/firebase.ts`:
+
+```typescript
+const firebaseConfig = {
+  apiKey: "your-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+};
 ```
 
-**Edit a file directly in GitHub**
+### 5. Configure Security Rules
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+**Firestore Rules** (Database > Rules):
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Articles are readable by all, writable by authenticated users
+    match /articles/{articleId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Upload logs readable by all authenticated users
+    match /uploadLogs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Site settings only for super admins
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
+    }
+  }
+}
+```
 
-**Use GitHub Codespaces**
+**Storage Rules** (Storage > Rules):
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 6. Create Initial Admin User
 
-## What technologies are used for this project?
+1. Go to `/admin` route in your app
+2. Try logging in to create a user account
+3. In Firebase Console > Authentication > Users
+4. Note the User UID of your account
+5. Go to Firestore Database > Start collection > "users"
+6. Create document with User UID as document ID:
+   ```json
+   {
+     "name": "Your Name",
+     "email": "your@email.com",
+     "role": "super_admin",
+     "isActive": true,
+     "createdAt": [current timestamp]
+   }
+   ```
 
-This project is built with:
+## Development
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+# Install dependencies
+npm install
 
-## How can I deploy this project?
+# Start development server
+npm run dev
 
-Simply open [Lovable](https://lovable.dev/projects/bb790849-3d13-40b7-a708-ce66c55e85f0) and click on Share -> Publish.
+# Build for production
+npm run build
+```
 
-## Can I connect a custom domain to my Lovable project?
+## User Roles
 
-Yes, you can!
+### Author
+- Create and edit their own articles
+- Upload media files  
+- View personal analytics
+- Manage drafts and published content
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Super Admin
+- All author permissions
+- User management (create, deactivate, change roles)
+- Content moderation (hide, delete any content)
+- Site control (maintenance mode, registration toggle)
+- System monitoring and security logs
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Demo Credentials
+
+For development/testing (create these users manually):
+- **Author**: author@groot.com / password123
+- **Super Admin**: admin@groot.com / admin123
+
+## Deployment
+
+Simply open [Lovable](https://lovable.dev/projects/bb790849-3d13-40b7-a708-ce66c55e85f0) and click on Share → Publish.
