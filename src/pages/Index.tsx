@@ -11,25 +11,31 @@ const Index = () => {
   const latestArticles = mockArticles.filter(article => !article.featured).slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Navigation />
       <HeroSection />
       
       {/* Featured Article */}
       {featuredArticle && (
-        <section className="py-16 bg-gradient-secondary">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-foreground">Featured Story</h2>
-              <Button variant="ghost" size="sm" asChild>
+        <section className="py-24 bg-gradient-secondary relative">
+          <div className="absolute inset-0 bg-grid opacity-30"></div>
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="flex items-center justify-between mb-12 animate-fade-in">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-cta rounded-full flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <h2 className="text-4xl lg:text-5xl font-bold text-gradient">Featured Story</h2>
+              </div>
+              <Button variant="ghost" size="lg" className="hover-lift hidden lg:flex" asChild>
                 <Link to="/articles">
                   View All Articles
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 max-w-6xl mx-auto animate-slide-up">
               <ArticleCard {...featuredArticle} />
             </div>
           </div>
@@ -37,39 +43,49 @@ const Index = () => {
       )}
 
       {/* Latest Articles */}
-      <section className="py-16">
+      <section className="py-24 relative">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold text-foreground">Latest Articles</h2>
+          <div className="flex items-center justify-between mb-12 animate-fade-in">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-accent rounded-full flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gradient">Latest Articles</h2>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {latestArticles.map((article) => (
-              <ArticleCard key={article.id} {...article} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-slide-up">
+            {latestArticles.map((article, index) => (
+              <div
+                key={article.id}
+                className="animate-scale-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <ArticleCard {...article} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Categories */}
-      <section className="py-16 bg-gradient-secondary">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Explore Categories</h2>
+      <section className="py-24 bg-gradient-secondary relative">
+        <div className="absolute inset-0 bg-grid opacity-20"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-16 text-center animate-fade-in">Explore Categories</h2>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {mockCategories.map((category) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {mockCategories.map((category, index) => (
               <Link
                 key={category.id}
                 to={`/categories/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="bg-card hover:bg-card/80 rounded-lg p-4 text-center transition-all duration-300 hover:shadow-lg group"
+                className="glass-effect hover-lift rounded-2xl p-6 text-center transition-all duration-500 group border border-primary/20 animate-scale-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <h3 className="font-semibold text-card-foreground group-hover:text-primary transition-colors text-sm">
+                <h3 className="font-bold text-card-foreground group-hover:text-gradient transition-all duration-300 text-lg mb-2">
                   {category.name}
                 </h3>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground">
                   {category.count} articles
                 </p>
               </Link>
@@ -79,25 +95,29 @@ const Index = () => {
       </section>
 
       {/* Newsletter CTA */}
-      <section className="py-16">
+      <section className="py-24 relative">
         <div className="container mx-auto px-4">
-          <div className="bg-gradient-primary rounded-2xl p-8 lg:p-12 text-center">
-            <h2 className="text-3xl lg:text-4xl font-bold text-primary-foreground mb-4">
-              Stay Ahead of the Curve
-            </h2>
-            <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-              Get the latest science and technology insights delivered to your inbox. 
-              Join thousands of researchers, engineers, and curious minds.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg bg-background/10 border border-background/20 text-primary-foreground placeholder:text-primary-foreground/60 focus:outline-none focus:ring-2 focus:ring-background/30"
-              />
-              <Button variant="secondary" size="lg">
-                Subscribe
-              </Button>
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-hero rounded-3xl"></div>
+            <div className="absolute inset-0 bg-grid opacity-20 rounded-3xl"></div>
+            <div className="relative z-10 glass-effect rounded-3xl p-12 lg:p-16 text-center border border-primary/30 hover-glow animate-scale-in">
+              <h2 className="text-4xl lg:text-6xl font-bold text-gradient mb-6">
+                Stay Ahead of the Curve
+              </h2>
+              <p className="text-xl lg:text-2xl text-foreground/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+                Get the latest science and technology insights delivered to your inbox. 
+                Join thousands of researchers, engineers, and curious minds.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6 max-w-lg mx-auto">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 px-6 py-4 rounded-2xl glass-effect border border-primary/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg"
+                />
+                <Button size="lg" className="px-8 py-4 bg-gradient-cta hover:scale-105 transition-all duration-300 text-lg font-semibold rounded-2xl hover-glow">
+                  Subscribe
+                </Button>
+              </div>
             </div>
           </div>
         </div>
