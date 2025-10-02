@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, Moon, Sun } from 'lucide-react';
 import { Button } from './button';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const navItems = [
     { name: 'Latest', href: '/' },
@@ -56,10 +58,23 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Search and Admin */}
+          {/* Search, Theme Toggle and Admin */}
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" className="hidden sm:flex hover-lift rounded-xl">
               <Search className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleTheme}
+              className="hover-lift rounded-xl"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </Button>
             <Button size="sm" className="bg-gradient-cta hover:scale-105 transition-all duration-300 hover-glow rounded-xl font-semibold" asChild>
               <Link to="/admin">Admin</Link>

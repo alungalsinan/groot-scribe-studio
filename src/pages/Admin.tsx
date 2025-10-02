@@ -1,5 +1,5 @@
 import { Navigation } from '@/components/ui/navigation';
-import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AuthorAdmin } from '@/components/admin/AuthorAdmin';
 import { SuperAdmin } from '@/components/admin/SuperAdmin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,14 +11,18 @@ import { LogIn } from 'lucide-react';
 function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useSupabaseAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      await login(email, password);
+      await signIn(email, password);
     } catch (error) {
       console.error('Login failed:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,8 +57,8 @@ function AdminLogin() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
         </CardContent>
@@ -64,7 +68,7 @@ function AdminLogin() {
 }
 
 function AdminContent() {
-  const { user, logout, isAuthor, isSuperAdmin } = useAuth();
+  const { profile, signOut, isAuthor, isSuperAdmin, role } = useSupabaseAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,10 +81,10 @@ function AdminContent() {
               {isAuthor ? 'Author Panel' : 'Super Admin Panel'}
             </h1>
             <p className="text-muted-foreground">
-              Logged in as {user?.name} ({user?.role})
+              Logged in as {profile?.name} ({role})
             </p>
           </div>
-          <Button variant="outline" onClick={logout}>
+          <Button variant="outline" onClick={signOut}>
             Logout
           </Button>
         </div>
@@ -93,15 +97,7 @@ function AdminContent() {
 }
 
 export default function Admin() {
-  return (
-    <AuthProvider>
-      <AdminWrapper />
-    </AuthProvider>
-  );
-}
-
-function AdminWrapper() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
 
   if (loading) {
     return (

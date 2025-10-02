@@ -13,10 +13,10 @@ import {
   User,
   Calendar
 } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export function AuthorAdmin() {
-  const { user } = useAuth();
+  const { profile } = useSupabaseAuth();
   const [selectedTab, setSelectedTab] = useState('my-articles');
 
   // Mock data for author's content
@@ -58,7 +58,7 @@ export function AuthorAdmin() {
     <div className="space-y-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Author Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {user?.name}. Manage your content and uploads.</p>
+        <p className="text-muted-foreground">Welcome back, {profile?.name}. Manage your content and uploads.</p>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
