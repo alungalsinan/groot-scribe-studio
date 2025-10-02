@@ -1,14 +1,65 @@
+import { useEffect, useState } from 'react';
 import { Navigation } from '@/components/ui/navigation';
 import { HeroSection } from '@/components/ui/hero-section';
 import { ArticleCard } from '@/components/ui/article-card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockArticles, mockCategories } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { Article } from '@/types/articles';
+import { Category } from '@/types/categories';
 
 const Index = () => {
-  const featuredArticle = mockArticles.find(article => article.featured);
-  const latestArticles = mockArticles.filter(article => !article.featured).slice(0, 4);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .order('published_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching articles:', error);
+      } else {
+        const mappedArticles = data.map((article: any) => ({
+          id: article.id,
+          title: article.title,
+          summary: article.summary,
+          author: article.author,
+          readingTime: article.reading_time,
+          publishedAt: article.published_at,
+          category: article.category,
+          imageUrl: article.image_url,
+          featured: article.featured,
+          content: article.content,
+        }));
+        setArticles(mappedArticles);
+      }
+    };
+
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*');
+      if (error) {
+        console.error('Error fetching categories:', error);
+      } else {
+        const mappedCategories = data.map((category: any) => ({
+          id: category.id,
+          name: category.name,
+          articleCount: category.article_count,
+        }));
+        setCategories(mappedCategories);
+      }
+    };
+
+    fetchArticles();
+    fetchCategories();
+  }, []);
+
+  const featuredArticle = articles.find(article => article.featured);
+  const latestArticles = articles.filter(article => !article.featured).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -75,7 +126,7 @@ const Index = () => {
           <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-16 text-center animate-fade-in">Explore Categories</h2>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {mockCategories.map((category, index) => (
+            {categories.map((category, index) => (
               <Link
                 key={category.id}
                 to={`/categories/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -86,7 +137,7 @@ const Index = () => {
                   {category.name}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {category.count} articles
+                  {category.articleCount} articles
                 </p>
               </Link>
             ))}
