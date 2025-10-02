@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -14,29 +14,47 @@ import {
   Calendar
 } from 'lucide-react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Article } from '@/types/articles';
 
 export function AuthorAdmin() {
-  const { profile } = useSupabaseAuth();
+  const { profile, user } = useSupabaseAuth();
   const [selectedTab, setSelectedTab] = useState('my-articles');
+  const [myArticles, setMyArticles] = useState<Article[]>([]);
+
+  useEffect(() => {
+    const fetchAuthorArticles = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('author_id', user.id);
+
+      if (error) {
+        console.error('Error fetching author articles:', error);
+      } else {
+        const mappedArticles = data.map((article: any) => ({
+          id: article.id,
+          title: article.title,
+          summary: article.summary,
+          author: article.author,
+          readingTime: article.reading_time,
+          publishedAt: article.published_at,
+          category: article.category,
+          imageUrl: article.image_url,
+          featured: article.featured,
+          content: article.content,
+        }));
+        setMyArticles(mappedArticles);
+      }
+    };
+
+    if (selectedTab === 'my-articles') {
+      fetchAuthorArticles();
+    }
+  }, [selectedTab, user]);
 
   // Mock data for author's content
-  const myArticles = [
-    {
-      id: '1',
-      title: 'The Future of AI in Web Development',
-      status: 'published',
-      createdAt: new Date('2024-01-15'),
-      views: 1250
-    },
-    {
-      id: '2',
-      title: 'Understanding Quantum Computing Basics',
-      status: 'draft',
-      createdAt: new Date('2024-01-20'),
-      views: 0
-    }
-  ];
-
   const recentUploads = [
     {
       id: '1',
@@ -101,17 +119,18 @@ export function AuthorAdmin() {
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {article.createdAt.toLocaleDateString()}
+                          {new Date(article.publishedAt).toLocaleDateString()}
                         </div>
                         <div className="flex items-center gap-1">
                           <User className="h-4 w-4" />
-                          {article.views} views
+                          {/* Replace with actual views when available */}
+                          0 views
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
-                        {article.status}
+                      <Badge variant={article.featured ? 'default' : 'secondary'}>
+                        {article.featured ? 'Featured' : 'Standard'}
                       </Badge>
                       <Button variant="outline" size="sm">Edit</Button>
                     </div>

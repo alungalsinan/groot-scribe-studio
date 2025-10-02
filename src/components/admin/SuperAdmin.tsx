@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -18,65 +18,75 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@/types/users';
+import { Article } from '@/types/articles';
 
 export function SuperAdmin() {
   const [selectedTab, setSelectedTab] = useState('dashboard');
+  const [users, setUsers] = useState<User[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [siteSettings, setSiteSettings] = useState({
     isMaintenanceMode: false,
     allowRegistration: true,
     showContent: true
   });
 
-  // Mock data
-  const users = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'author',
-      status: 'active',
-      lastLogin: new Date('2024-01-20'),
-      articlesCount: 5
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      role: 'author',
-      status: 'inactive',
-      lastLogin: new Date('2024-01-15'),
-      articlesCount: 12
-    }
-  ];
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (error) {
+        console.error('Error fetching users:', error);
+      } else {
+        const mappedUsers = data.map((user: any) => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          status: user.is_active ? 'active' : 'inactive',
+          lastLogin: new Date(user.last_login),
+          articlesCount: 0, // Placeholder
+        }));
+        setUsers(mappedUsers);
+      }
+    };
 
-  const allContent = [
-    {
-      id: '1',
-      title: 'The Future of AI',
-      author: 'John Doe',
-      type: 'article',
-      status: 'published',
-      views: 1250,
-      isVisible: true
-    },
-    {
-      id: '2',
-      title: 'January 2024 Issue',
-      author: 'Jane Smith',
-      type: 'issue',
-      status: 'published',
-      downloads: 850,
-      isVisible: true
+    const fetchArticles = async () => {
+      const { data, error } = await supabase.from('articles').select('*');
+      if (error) {
+        console.error('Error fetching articles:', error);
+      } else {
+        const mappedArticles = data.map((article: any) => ({
+          id: article.id,
+          title: article.title,
+          summary: article.summary,
+          author: article.author,
+          readingTime: article.reading_time,
+          publishedAt: article.published_at,
+          category: article.category,
+          imageUrl: article.image_url,
+          featured: article.featured,
+          content: article.content,
+        }));
+        setArticles(mappedArticles);
+      }
+    };
+
+    if (selectedTab === 'users') {
+      fetchUsers();
     }
-  ];
+    if (selectedTab === 'content') {
+      fetchArticles();
+    }
+  }, [selectedTab]);
 
   const systemStats = {
-    totalUsers: 25,
-    activeUsers: 18,
-    totalArticles: 89,
-    totalIssues: 12,
-    storageUsed: '2.4 GB',
-    monthlyViews: 45600
+    totalUsers: users.length,
+    activeUsers: users.filter(u => u.status === 'active').length,
+    totalArticles: articles.length,
+    totalIssues: 0, // Placeholder
+    storageUsed: '2.4 GB', // Placeholder
+    monthlyViews: 45600 // Placeholder
   };
 
   return (
@@ -227,26 +237,25 @@ export function SuperAdmin() {
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
-                {allContent.map((content) => (
-                  <div key={content.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                {articles.map((article) => (
+                  <div key={article.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <div>
-                          <h4 className="font-medium">{content.title}</h4>
+                          <h4 className="font-medium">{article.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            By {content.author} • {content.type} • 
-                            {content.type === 'article' ? ` ${content.views} views` : ` ${content.downloads} downloads`}
+                            By {article.author}
                           </p>
                         </div>
-                        <Badge variant={content.status === 'published' ? 'default' : 'secondary'}>
-                          {content.status}
+                        <Badge variant={article.featured ? 'default' : 'secondary'}>
+                          {article.featured ? 'Featured' : 'Standard'}
                         </Badge>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm">
-                        {content.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        {content.isVisible ? 'Hide' : 'Show'}
+                        <Eye className="h-4 w-4" />
+                        Hide
                       </Button>
                       <Button variant="outline" size="sm">Edit</Button>
                       <Button variant="destructive" size="sm">Delete</Button>
