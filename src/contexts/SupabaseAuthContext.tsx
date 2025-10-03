@@ -50,27 +50,27 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     setError(null);
   }, []);
 
-  const fetchUserProfile = useCallback(async (userId: string): Promise<void> => {
+  const fetchUserProfile = useCallback(async (user: User): Promise<void> => {
     try {
-      console.log('🔍 Fetching user profile for:', userId);
+      console.log('🔍 Fetching user profile for:', user.id);
       
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', user.id)
         .single();
 
       if (error) {
         // If profile doesn't exist, create one
         if (error.code === 'PGRST116') {
-          console.log('📝 Creating new profile for user:', userId);
+          console.log('📝 Creating new profile for user:', user.id);
           
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .insert({
-              id: userId,
-              email: user?.email || '',
-              name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+              id: user.id,
+              email: user.email || '',
+              name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
               is_active: true,
               created_at: new Date().toISOString()
             })
@@ -102,7 +102,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         variant: 'destructive',
       });
     }
-  }, [user]);
+  }, []);
 
   const fetchUserRole = useCallback(async (userId: string): Promise<void> => {
     try {
@@ -164,7 +164,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     
     try {
       await Promise.all([
-        fetchUserProfile(user.id),
+        fetchUserProfile(user),
         fetchUserRole(user.id)
       ]);
     } catch (err) {
@@ -198,7 +198,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           
           try {
             await Promise.all([
-              fetchUserProfile(session.user.id),
+              fetchUserProfile(session.user),
               fetchUserRole(session.user.id)
             ]);
           } catch (err) {
@@ -246,7 +246,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           
           try {
             await Promise.all([
-              fetchUserProfile(session.user.id),
+              fetchUserProfile(session.user),
               fetchUserRole(session.user.id)
             ]);
           } catch (err) {
